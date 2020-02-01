@@ -141,6 +141,24 @@ def add_dropdown(divs, ids_, options):
         )
     return divs
 
+def add_dropdown_v(divs, ids_, options, value):
+    """
+    Add dropdown
+    Args:
+        divs (list) : list of divs to append
+        id_   (str) : id_ to use for dropdown (id_ + '-dropdown')
+    Returns:
+        divs (list) : list of divs with appended dropdown
+    """
+    for i in range(len(ids_)):
+        divs.append(
+            html.Div(
+                get_dropdown(id_=ids_[i], options=options[i], value=value)
+            )
+        )
+    return divs
+
+
 def add_slider(divs, id_):
     divs.append(get_slider(id_))
     divs.append(html.Div(id=id_ + '-slider_output'))
@@ -167,6 +185,24 @@ def get_dropdown(id_, options, multi=False):
         id=id_ + '-dropdown',
         options=[{'label': j, 'value': j} for j in options],
         value=options[0],
+        multi=multi
+    )
+
+
+def get_dropdown_v(id_, options, multi=False, value=None):
+    """
+    Args:
+        id_      (str) : id_ to use for dropdown (id_ + '-dropdown')
+        options (list) : list of options to include in dropdown
+    Returns:
+        dropdown div
+    """
+    if value is None:
+        value=options[0]
+    return dcc.Dropdown(
+        id=id_ + '-dropdown',
+        options=[{'label': j, 'value': j} for j in options],
+        value=value,
         multi=multi
     )
 

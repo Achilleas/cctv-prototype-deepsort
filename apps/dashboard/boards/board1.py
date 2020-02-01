@@ -16,7 +16,7 @@ import os
 from apps.dashboard.layouts.main_layouts import *
 from apps.general.layouts import *
 from deep_sort_pytorch.RLogger import RLogger
-from deep_sort_pytorch.general_utils import get_millis, get_millis_past
+from deep_sort_pytorch.general_utils import get_millis, get_millis_past, tracker_similarity_check
 #from apps.general.graph_build import *
 
 class MainDashboard(BoardBlock):
@@ -44,7 +44,7 @@ class MainDashboard(BoardBlock):
                         Input('filter_menu_class-dropdown', 'value'),
                         Input('filter_menu_video-dropdown', 'value')],
                         [State('perimeter', 'figure')])
-        def update_perimeter_graph(start_date, end_date, class_id, video_ids_str, fig):
+        def update_perimeter_graph(start_date, end_date, class_str, video_ids_str, fig):
             if isinstance(video_ids_str, str):
                 video_ids_str = [video_ids_str]
 
@@ -61,7 +61,7 @@ class MainDashboard(BoardBlock):
             num_events_l = []
             video_id_l = []
             for video_id in np.sort(video_ids_num):
-                events_l = self.rlogger.get_interval_events(start_millis, end_millis, class_id=class_id, video_id=video_id)
+                events_l = self.rlogger.get_interval_events(start_millis, end_millis, class_id=class_str, video_id=video_id)
                 num_events_l.append(len(events_l))
                 video_id_l.append(video_id)
 
@@ -72,50 +72,83 @@ class MainDashboard(BoardBlock):
                         [State('datatable', 'data'),
                          State('filter_menu_class-dropdown', 'value'),
                          State('filter_menu_video-dropdown', 'value')])
-        def update_datatable(n_intervals, data, class_id, video_ids_str):
+        def update_datatable(n_intervals, data, class_str, video_ids_str):
             if isinstance(video_ids_str, str):
                 video_ids_str = [video_ids_str]
-            time.sleep(2)
-            print('DATA', data)
-            print(n_intervals)
+            time.sleep(1)
+            #print('--------\n\n\n\n\n\n\n\n')
+            alert_ids = []
+            for r in data:
+                if 'ALERT ID' in r.keys():
+                    alert_ids.append(r['ALERT ID'])
 
-            print(video_ids_str)
+            #print('ALERT IDS ALREADY UP', alert_ids)
             video_ids_num = [video_id_str.split('_')[-1] for video_id_str in video_ids_str]
 
             #Was a human seen in camera 5 the last minute?
-            human_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(60), None, class_id=0, video_id=5)
-            human_trigger_details_l = self.rlogger.get_event_details(human_trigger_event_l)
-            print('PRESENCE TRIGGER DETAILS L', human_trigger_details_l)
+            human_trigger_video_id = 5
+
+            if 'cctv_{}'.format(human_trigger_video_id) not in alert_ids:
+                #print('I SHOULD BE HERE MAN')
+                human_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(60), None, class_id='person', video_id=human_trigger_video_id)
+                human_trigger_details_l = self.rlogger.get_event_details(human_trigger_event_l)
+                #print(human_trigger_event_l)
+                if len(human_trigger_event_l) > 0:
+                    #print('PRESENCE TRIGGER DETAILS L', human_trigger_details_l)
+
+                    data.append({'ALERT ID' : 'cctv_{}'.format(human_trigger_video_id),
+                                'DATE' : datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                                'TYPE' : 'detection_trigger',
+                                'INFO' : 'Object detected: person'})
+
 
             #For camera 6, I have expectations of vectors in which the people will approach (b-l to t-r)
             #Preset start locations and distance metrics
             #Extract locations of trigger
             direction_video_id = 6
-            pos_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(10), None, class_id=0, video_id=direction_video_id)
-            pos_trigger_details_l = self.rlogger.get_event_details([pos_trigger_event_l])
 
-            print('ALL DETAILS TO CHECK FOR ERROR', pos_trigger_details_l)
-            max_y, max_x, channels = self.rlogger.get_video_size(direction_video_id)
-            #Expectation:
-            ref_vec_l = [[0, max_y]]
-            ref_loc_l = [[1, -1]]
-            img_shape=[max_y, max_x, channels]
+            if 'cctv_{}'.format(direction_video_id) not in alert_ids:
+                pos_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(60), None, class_id='person', video_id=direction_video_id)
+                #print('POSITION TRIGGER EVENT LIST:', pos_trigger_event_l)
 
-            failed_counter = 0
-            passed_counter = 0
-            for detail_d in pos_trigger_details_l:
-                rectangle_l = detail_d['rectangle_l']
-                passed_threshold, similarity_val = general_utils.tracker_similarity_check(ref_loc_l, ref_vec_l, rectangle_l, img_shape, threshold=0.3)
-                print('PASSED:', passed_threshold, 'SIMILARITY:', similarity_val)
-                if passed_threshold:
-                    passed_counter += 1
-                else:
-                    failed_counter += 1
-            data.append({'ALERT ID' : 'test_id',
-                        'DATE' : now_str = datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-                        'TYPE' : 'tracking_similarity_threshold_exceeded',
-                        'INFO' : 'Number objects: {}, Passed: {} Failed: {}'.format(failed_counter + passed_counter, passed_counter, failed_counter)}
+                pos_trigger_details_l = self.rlogger.get_event_details(pos_trigger_event_l)
 
+                #print('HOW MANY CAMERA 6 PERSONSSS', len(pos_trigger_event_l))
+                num_people = len(pos_trigger_event_l)
+                if len(pos_trigger_event_l) > 0:
+                    #print('ALL DETAILS TO CHECK FOR ERROR', pos_trigger_details_l)
+                    max_y, max_x, channels = self.rlogger.get_video_size(direction_video_id)
+                    #Expectation:
+                    ref_vec_l = [[0, max_y]]
+                    ref_loc_l = [[1, -1]]
+                    img_shape=[max_y, max_x, channels]
+
+                    failed_counter = 0
+                    passed_counter = 0
+                    for detail_d in pos_trigger_details_l:
+                        #print('NOW LOOKIG AT:', detail_d)
+                        rectangle_l = json.loads(detail_d['rectangle_l'])
+                        if len(rectangle_l) < 5:
+                            print('Skipping for now', detail_d)
+                            continue
+                        #print('NOT SKIPPING THIS ONE')
+                        passed_threshold, similarity_val = tracker_similarity_check(ref_loc_l, ref_vec_l, rectangle_l, img_shape, threshold=0.3)
+                        #print('PASSED:', passed_threshold, 'SIMILARITY:', similarity_val)
+                        if passed_threshold:
+                            passed_counter += 1
+                        else:
+                            failed_counter += 1
+                        total_checked = passed_counter + failed_counter
+                        data.append({'ALERT ID' : 'cctv_{}'.format(direction_video_id),
+                                    'DATE' : datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                                    'TYPE' : 'walk_similarity_BELOW_LIMIT',
+                                    'INFO' : 'Number objects: {}, PASSED: {} FAILED: {}, NO INFO {}:'.format(
+                                                    num_people,
+                                                    passed_counter,
+                                                    failed_counter,
+                                                    num_people - passed_counter-failed_counter)})
+            #print('DATA STATE:', data)
+            return data
 
 
 config_path='deep_sort_pytorch/configs/redis_config.yml'

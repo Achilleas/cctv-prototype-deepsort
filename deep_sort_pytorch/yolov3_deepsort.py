@@ -33,7 +33,7 @@ class VideoTracker(object):
         self.class_names = self.detector.class_names
 
         self.rlogger = self.getRLogger()
-        self.video_id = 1
+        self.video_id = 6
 
         self.tracking_dict = {}
 
@@ -55,7 +55,7 @@ class VideoTracker(object):
             print(exc_type, exc_value, exc_traceback)
 
     def apply_track_step(self, identities, class_ids, rectangle_l):
-        print(rectangle_l)
+        #print(rectangle_l)
         for i, rectangle in enumerate(rectangle_l):
             identity = identities[i]
             idn = identity
@@ -86,25 +86,27 @@ class VideoTracker(object):
             self.rlogger.update_tracked_object(redis_id=redis_id, update_d={'time_end' : self.tracking_dict[idn]['time_end'],
                                                                             'rectangle_l' : self.tracking_dict[idn]['rectangle_l']})
 
-        print('IDENTITIES THIS STEP:', identities)
-        print('IDENTITIES IN TRACKING DITC', list(self.tracking_dict.keys()))
+        #print('IDENTITIES THIS STEP:', identities)
+        #print('IDENTITIES IN TRACKING DITC', list(self.tracking_dict.keys()))
         not_tracked_idns = list(set(self.tracking_dict.keys()) - set(identities))
-        print('NOT TRACKED:', not_tracked_idns)
+        #print('NOT TRACKED:', not_tracked_idns)
         for not_tracked_idn in not_tracked_idns:
             #Any identity not tracked yet has -1 counter
             self.tracking_dict[not_tracked_idn]['frames_rem'] -= 1
 
             if self.tracking_dict[not_tracked_idn]['frames_rem'] <= 0:
-                print('REMOVING IDENTITY', not_tracked_idn)
+                #print('REMOVING IDENTITY', not_tracked_idn)
                 del self.tracking_dict[not_tracked_idn]
 
     def run(self):
         idx_frame = 0
         step_num = 0
 
+        #print('\n\n\n\n\n\n\n')
         #Register frame
         self.rlogger.record_video_size(self.video_id, [self.im_height, self.im_width, 3])
-        print('VIDEO SIEZE?', self.rlogger.get_video_size(self.video_id))
+        print('THE VIDEO ID???', self.video_id)
+        #print('VIDEO SIEZE?', self.rlogger.get_video_size(self.video_id))
         #record_video_size
         #get_video_size
         while self.vdo.grab():

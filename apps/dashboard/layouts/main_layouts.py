@@ -29,7 +29,7 @@ def filter_menu():
     divs = []
     date_picker = get_date_picker_range(id_=name + '_date_picker')
     class_drop = get_dropdown(id_=name + '_class', multi=False, options=['person', 'car'])
-    video_id = get_dropdown(id_=name + '_video', multi=True, options=['cctv_0', 'cctv_1', 'cctv_2'])
+    video_id = get_dropdown_v(id_=name + '_video', multi=True, options=['cctv_0', 'cctv_1', 'cctv_2', 'cctv_3', 'cctv_4','cctv_5','cctv_6'], value=['cctv_0', 'cctv_1', 'cctv_2', 'cctv_3', 'cctv_4','cctv_5','cctv_6'])
 
     divs.append(table_cell([class_drop, video_id, date_picker], [0.4, 0.4, 0.2]))
 
@@ -42,7 +42,7 @@ def filter_menu():
                     target="_blank"
                 )))
     '''
-    divs.append(html.Div(dcc.Interval(id="refresh", interval=1*2000, n_intervals=0)))
+    divs.append(html.Div(dcc.Interval(id="refresh", interval=1*4000, n_intervals=0)))
     return html.Div(divs)
 
 def perimeter_part():
@@ -60,7 +60,7 @@ def warnings_part():
     warning_columns = ['ALERT ID', 'DATE', 'TYPE', 'INFO']
     return html.Div(dash_table.DataTable(
         id = 'datatable',
-        data=[{}],
+        data=[],
         columns=[
             {'name': i, 'id': i} for i in warning_columns
         ],

@@ -122,13 +122,16 @@ class RLogger():
         Returns:
             event_ids       : list of event ids that fit the criteria
         """
-        print('HELOO ASDFJOISDA' , start, end, class_id, video_id)
+        if end == None:
+            end = 99999999999999999
+        if start == None:
+            start = 0
         if class_id == None:
             event_ids =  self.r.zrangebyscore('events', start, end)
         else:
             event_ids = self.r.zrangebyscore('events:{}'.format(class_id), start, end)
 
-        print(start, end)
+        #print(start, end)
         if video_id != None:
             id_video_pairs_str = self.r.zrangebyscore('events_vid', start, end)
             event_ids_vid = [id_video_pair_str.split('_')[0] for id_video_pair_str in id_video_pairs_str if int(id_video_pair_str.split('_')[1]) == int(video_id)]
@@ -162,9 +165,10 @@ class RLogger():
             pipe = self.r.pipeline(transaction=True)
 
         for event_id in event_ids:
+            print('LOOKING FOR', 'events:{}'.format(event_id))
             pipe.hgetall('events:{}'.format(event_id))
 
         if no_pipe:
             result = pipe.execute()
-
         print(result)
+        return result
