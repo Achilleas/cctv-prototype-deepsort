@@ -1,0 +1,8 @@
+deep_sort_pytorch/detector/YOLOv3/weight/yolov3-tiny.weights
+deep_sort_pytorch/detector/YOLOv3/weight/yolov3.weights
+deep_sort_pytorch/deep_sort/deep/checkpoint/ckpt.t7
+videos/VIRAT_01.mp4
+videos/demo.avi
+videos/TownCentreXVID.avi
+videos/PRG7.avi
+__pycache__/
