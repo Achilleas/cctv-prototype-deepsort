@@ -5,12 +5,12 @@ import argparse
 import torch
 import numpy as np
 
+import general_utils
 from general_utils import get_millis, get_class_from_id, extract_rectangle_centers
 from detector import build_detector
 from deep_sort import build_tracker
 from utils.draw import draw_boxes, draw_lines
 from utils.parser import get_config
-
 import redis
 from RLogger import RLogger
 import yaml
@@ -81,6 +81,7 @@ class VideoTracker(object):
 
             self.tracking_dict[idn]['rectangle_l'].append([int(v) for v in rectangle])
             self.tracking_dict[idn]['time_end'] = get_millis()
+
 
             #Update time end and rectangle_l to include latest
             self.rlogger.update_tracked_object(redis_id=redis_id, update_d={'time_end' : self.tracking_dict[idn]['time_end'],
@@ -156,6 +157,19 @@ class VideoTracker(object):
                             print('WHAAAA', center_l)
                             print('DETAILS', self.tracking_dict[idn])
                         ori_im = draw_lines(ori_im, center_l, idn)
+
+                        '''
+                        #Just something for cctv 6 (similarity index)
+                        if self.video_id == 6 and (len(rectangle_l) > 5):
+                            max_y = ori_im.shape[0]
+                            max_x = ori_im.shape[1]
+                            ref_vec_l = [[0, max_y]]
+                            ref_loc_l = [[1, -1]]
+                            passed_threshold, similarity_val = general_utils.tracker_similarity_check(ref_loc_l, ref_vec_l, self.tracking_dict[idn]['rectangle_l'], ori_im.shape, threshold=0.3)
+                            x1,y1,x2,y2 = [int(i) for i in rectangle_l[-1]]
+                            t_size = cv2.getTextSize(str(similarity_val), cv2.FONT_HERSHEY_PLAIN, 2 , 2)[0]
+                            cv2.putText(ori_im,str(general_utils.truncate(similarity_val, 2)),(x1,y1+t_size[1]+20), cv2.FONT_HERSHEY_PLAIN, 2, [0,0,0], 5)
+                        '''
             end = time.time()
             print("time: {:.03f}s, fps: {:.03f}".format(end-start, 1/(end-start)))
 
@@ -201,5 +215,7 @@ if __name__=="__main__":
     cfg.merge_from_file(args.config_detection)
     cfg.merge_from_file(args.config_deepsort)
 
+    print(args)
+    print(cfg)
     with VideoTracker(cfg, args) as vdo_trk:
         vdo_trk.run()

@@ -1,3 +1,4 @@
+import math
 import time
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -188,7 +189,22 @@ def get_vector_from_rectangle_l(rectangle_l):
     Given a set of boxes, calculate center point of each box.
     Then take vector between first and last spot
     '''
-    rec_centers = extract_rectangle_centers([rectangle_l[0], rectangle_l[1]])
+    rec_centers = extract_rectangle_centers([rectangle_l[0], rectangle_l[-1]])
     #print('REC CENTERS', rec_centers)
     vec = np.array(rec_centers[1]) - np.array(rec_centers[0])
     return vec / np.linalg.norm(vec)
+
+
+
+
+def truncate(number, digits) -> float:
+    '''
+    Truncate number to n nearest digits. Set to -ve for decimal places
+
+    Args:
+        number (float) : the number to truncate
+        digits (int) : nearest digits. 0 truncate to 1. 1 truncate to 10. -1
+                                        truncate to 0.1
+    '''
+    stepper = pow(10.0, digits)
+    return math.trunc(stepper * number) / stepper
