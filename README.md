@@ -11,9 +11,12 @@ A small 1-day prototype of cctv camera tracking cars and humans.
   - can add conditions for warnings on specific video_id (should be coded in). e.g. if car passed through show warning in dashboard
 
 ## Details
+- Python 3, Pytorch
 - Tracking from pytorch deepsort: https://github.com/ZQPei/deep_sort_pytorch (with a few edits)
 - Pre-trained net: YOLOv3
 - Dash/Plotly for visualization dashboard
+
+
 
 ## Setup and Run
 
