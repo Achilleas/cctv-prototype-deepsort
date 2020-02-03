@@ -82,7 +82,7 @@ class MainDashboard(BoardBlock):
                 if 'ALERT ID' in r.keys():
                     alert_ids.append(r['ALERT ID'])
 
-            print('ALERT IDS ALREADY UP', alert_ids)
+            #print('ALERT IDS ALREADY UP', alert_ids)
             video_ids_num = [video_id_str.split('_')[-1] for video_id_str in video_ids_str]
 
             #Was a human seen in camera 5 the last minute?
@@ -107,7 +107,7 @@ class MainDashboard(BoardBlock):
             #Extract locations of trigger
             direction_video_id = 6
 
-            print('alrert ids????')
+            #print('alrert ids????')
             if 'cctv_{}'.format(direction_video_id) not in alert_ids:
                 pos_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(60), None, class_id='person', video_id=direction_video_id)
                 #print('POSITION TRIGGER EVENT LIST:', pos_trigger_event_l)
