@@ -9,3 +9,6 @@ videos/session6_right.avi
 videos/session2_center.avi
 __pycache__/
 .ipynb_checkpoints
+
+build/
+*.so
