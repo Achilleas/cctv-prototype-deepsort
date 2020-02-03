@@ -1,6 +1,6 @@
-## About 
+## About
 
-A small 1-day prototype of cctv camera tracking cars and humans. 
+A small 1-day prototype of cctv camera tracking cars and humans.
 
 - Run script for different video_id (representing different cctv camera)
 - Store in Redis database (should be easy to change)
@@ -32,7 +32,7 @@ cd ../../../
 3. Download deepsort parameters ckpt.t7
 ```
 cd deep_sort/deep/checkpoint
-# download ckpt.t7 from 
+# download ckpt.t7 from
 https://drive.google.com/drive/folders/1xhG0kRH1EX5B9_Iz8gQJb7UNnn_riXi6 to this folder
 cd ../../../
 ```  
@@ -50,7 +50,7 @@ cd ../../..
 ### 3: Run
 ```
 usage: python cctv_run.py VIDEO_PATH
-                                [--help] 
+                                [--help]
                                 [--frame_interval FRAME_INTERVAL]
                                 [--config_detection CONFIG_DETECTION]
                                 [--config_deepsort CONFIG_DEEPSORT]
@@ -63,6 +63,9 @@ usage: python cctv_run.py VIDEO_PATH
 ```
 
 ### 4: Example outputs
-![Visualization app](demo/visualization_app.png)
-![Example prediction 1](demo/predict.gif)
+Example prediction
+![Example prediction 1](demo/predict_1.gif)
 ![Example prediction 2](demo/predict_2.gif)
+
+Example visualization
+![Visualization app](demo/visualization_app.png)
