@@ -3,7 +3,6 @@
 A small 1-day prototype of cctv camera tracking cars and humans. 
 
 - Run script for different video_id (representing different cctv camera)
-- Object recognition and tracking the paths of each identified object
 - Store in Redis database (should be easy to change)
 - Visualization dashboard prototype for summaries
   - filtering on different objects, cctv and time intervals
