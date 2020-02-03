@@ -2,8 +2,8 @@ import sys
 import time
 from PIL import Image, ImageDraw
 #from models.tiny_yolo import TinyYoloNet
-from yolo_utils import *
-from darknet import Darknet
+from .yolo_utils import *
+from .darknet import Darknet
 
 import cv2
 
@@ -21,7 +21,7 @@ def detect(cfgfile, weightfile, imgfolder):
     #     namesfile = 'data/coco.names'
     # else:
     #     namesfile = 'data/names'
-    
+
     use_cuda = True
     if use_cuda:
         m.cuda()
@@ -30,7 +30,7 @@ def detect(cfgfile, weightfile, imgfolder):
     imgfiles.sort()
     for imgname in imgfiles:
         imgfile = os.path.join(imgfolder,imgname)
-        
+
         img = Image.open(imgfile).convert('RGB')
         sized = img.resize((m.width, m.height))
 
@@ -62,7 +62,7 @@ def detect_cv2(cfgfile, weightfile, imgfile):
         namesfile = 'data/coco.names'
     else:
         namesfile = 'data/names'
-    
+
     use_cuda = True
     if use_cuda:
         m.cuda()
@@ -70,7 +70,7 @@ def detect_cv2(cfgfile, weightfile, imgfile):
     img = cv2.imread(imgfile)
     sized = cv2.resize(img, (m.width, m.height))
     sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
-    
+
     for i in range(2):
         start = time.time()
         boxes = do_detect(m, sized, 0.5, 0.4, use_cuda)
@@ -96,14 +96,14 @@ def detect_skimage(cfgfile, weightfile, imgfile):
         namesfile = 'data/coco.names'
     else:
         namesfile = 'data/names'
-    
+
     use_cuda = True
     if use_cuda:
         m.cuda()
 
     img = io.imread(imgfile)
     sized = resize(img, (m.width, m.height)) * 255
-    
+
     for i in range(2):
         start = time.time()
         boxes = do_detect(m, sized, 0.5, 0.4, use_cuda)

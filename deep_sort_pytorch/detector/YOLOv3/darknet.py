@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from cfg import *
-from region_layer import RegionLayer
-from yolo_layer import YoloLayer
+from .cfg import *
+from .region_layer import RegionLayer
+from .yolo_layer import YoloLayer
 #from layers.batchnorm.bn import BN2d
 
 class MaxPoolStride1(nn.Module):
@@ -157,7 +157,7 @@ class Darknet(nn.Module):
 
     def create_network(self, blocks):
         models = nn.ModuleList()
-    
+
         prev_filters = 3
         out_filters =[]
         prev_stride = 1
@@ -194,7 +194,7 @@ class Darknet(nn.Module):
                 prev_filters = filters
                 out_filters.append(prev_filters)
                 prev_stride = stride * prev_stride
-                out_strides.append(prev_stride)                
+                out_strides.append(prev_stride)
                 models.append(model)
             elif block['type'] == 'maxpool':
                 pool_size = int(block['size'])
@@ -205,7 +205,7 @@ class Darknet(nn.Module):
                     model = MaxPoolStride1()
                 out_filters.append(prev_filters)
                 prev_stride = stride * prev_stride
-                out_strides.append(prev_stride)                
+                out_strides.append(prev_stride)
                 models.append(model)
             elif block['type'] == 'avgpool':
                 model = GlobalAvgPool2d()
@@ -231,13 +231,13 @@ class Darknet(nn.Module):
                 prev_filters = stride * stride * prev_filters
                 out_filters.append(prev_filters)
                 prev_stride = prev_stride * stride
-                out_strides.append(prev_stride)                
+                out_strides.append(prev_stride)
                 models.append(Reorg(stride))
             elif block['type'] == 'upsample':
                 stride = int(block['stride'])
                 out_filters.append(prev_filters)
                 prev_stride = prev_stride / stride
-                out_strides.append(prev_stride)                
+                out_strides.append(prev_stride)
                 #models.append(nn.Upsample(scale_factor=stride, mode='nearest'))
                 models.append(Upsample(stride))
             elif block['type'] == 'route':
@@ -314,15 +314,15 @@ class Darknet(nn.Module):
                 yolo_layer.net_height = self.height
                 out_filters.append(prev_filters)
                 out_strides.append(prev_stride)
-                models.append(yolo_layer)                
+                models.append(yolo_layer)
             else:
                 print('unknown type %s' % (block['type']))
-    
+
         return models
 
     def load_binfile(self, weightfile):
         fp = open(weightfile, 'rb')
-       
+
         version = np.fromfile(fp, count=3, dtype=np.int32)
         version = [int(i) for i in version]
         if version[0]*10+version[1] >=2 and version[0] < 1000 and version[1] < 1000:
@@ -372,7 +372,7 @@ class Darknet(nn.Module):
             elif block['type'] == 'region':
                 pass
             elif block['type'] == 'yolo':
-                pass                
+                pass
             elif block['type'] == 'avgpool':
                 pass
             elif block['type'] == 'softmax':
@@ -418,7 +418,7 @@ class Darknet(nn.Module):
             elif block['type'] == 'reorg':
                 pass
             elif block['type'] == 'upsample':
-                pass                
+                pass
             elif block['type'] == 'route':
                 pass
             elif block['type'] == 'shortcut':

@@ -3,9 +3,9 @@ import torch
 import numpy as np
 import cv2
 
-from darknet import Darknet
-from yolo_utils import get_all_boxes, nms, post_process, xywh_to_xyxy, xyxy_to_xywh
-from nms import boxes_nms
+from .darknet import Darknet
+from .yolo_utils import get_all_boxes, nms, post_process, xywh_to_xyxy, xyxy_to_xywh
+from .nms import boxes_nms
 
 
 class YOLOv3(object):

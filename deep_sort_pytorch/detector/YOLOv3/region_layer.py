@@ -5,7 +5,7 @@ import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from yolo_utils import bbox_iou, multi_bbox_ious, convert2cpu
+from .yolo_utils import bbox_iou, multi_bbox_ious, convert2cpu
 
 class RegionLayer(nn.Module):
     def __init__(self, num_classes=0, anchors=[], num_anchors=1, use_cuda=None):
@@ -164,7 +164,7 @@ class RegionLayer(nn.Module):
         t3 = time.time()
         loss_coord = self.coord_scale * nn.MSELoss(size_average=False)(coord*coord_mask, tcoord*coord_mask)/2
         # sqrt(object_scale)/2 is almost equal to 1.
-        loss_conf = nn.MSELoss(size_average=False)(conf*conf_mask, tconf*conf_mask)/2 
+        loss_conf = nn.MSELoss(size_average=False)(conf*conf_mask, tconf*conf_mask)/2
         loss_cls = self.class_scale * nn.CrossEntropyLoss(size_average=False)(cls, tcls) if cls.size(0) > 0 else 0
         loss = loss_coord + loss_conf + loss_cls
         t4 = time.time()
@@ -175,7 +175,7 @@ class RegionLayer(nn.Module):
             print('     build targets : %f' % (t3 - t2))
             print('       create loss : %f' % (t4 - t3))
             print('             total : %f' % (t4 - t0))
-        print('%d: nGT %3d, nRC %3d, nPP %3d, loss: box %6.3f, conf %6.3f, class %6.3f, total %7.3f' 
+        print('%d: nGT %3d, nRC %3d, nPP %3d, loss: box %6.3f, conf %6.3f, class %6.3f, total %7.3f'
             % (self.seen, nGT, nRecall, nProposals, loss_coord, loss_conf, loss_cls, loss))
         if math.isnan(loss.item()):
             print(conf, tconf)
