@@ -63,9 +63,9 @@ usage: python cctv_run.py VIDEO_PATH
 ```
 
 ### 4: Example outputs
-Example prediction
+Example prediction <br/>
 ![Example prediction 1](demo/predict_1.gif)
 ![Example prediction 2](demo/predict_2.gif)
-
+<br/><br/>
 Example visualization
 ![Visualization app](demo/visualization_app.png)
