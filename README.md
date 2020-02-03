@@ -1,13 +1,23 @@
 ## About 
 
-A small 1-day prototype of cctv camera tracking cars and humans. Records the paths of each identified object,
-and stores in Redis database. Lastly, a visualization dashboard for viewing occurences for each cctv camera (video_id) and also show warnings. Conditions for warnings can be coded in for each camera id (e.g. if car is found in video_id 5 then show warning).
+A small 1-day prototype of cctv camera tracking cars and humans. 
 
-# Pytorch deepsort from https://github.com/ZQPei/deep_sort_pytorch
-# Run redis server
-# Run app.py visualization app (/dashboard)
+- Run script for different video_id (representing different cctv camera)
+- Object recognition and tracking the paths of each identified object
+- Store in Redis database (should be easy to change)
+- Visualization dashboard prototype for summaries
+  - filtering on different objects, cctv and time intervals
+  - example map of where cctv is and its occurences
+  - can add conditions for warnings on specific video_id (should be coded in). e.g. if car passed through show warning in dashboard
 
-## From Pytorch deepsort:
+## Details
+- Tracking from pytorch deepsort: https://github.com/ZQPei/deep_sort_pytorch (with a few edits)
+- Pre-trained net: YOLOv3
+- Dash/Plotly for visualization dashboard
+
+## Setup and Run
+
+### 1: Pytorch deepsort:
 
 2. Download YOLOv3 parameters
 ```
@@ -31,8 +41,11 @@ cd detector/YOLOv3/nms
 sh build.sh
 cd ../../..
 ```
+### 2: Database and Dashboard
+- Run Redis server
+- Run dashboard app.py (/dashboard)
 
-## Run
+### 3: Run
 ```
 usage: python cctv_run.py VIDEO_PATH
                                 [--help] 
@@ -45,8 +58,9 @@ usage: python cctv_run.py VIDEO_PATH
                                 [--display_height DISPLAY_HEIGHT]
                                 [--save_path SAVE_PATH]          
                                 [--cpu]          
+```
 
-## Example outputs
+### 4: Example outputs
 ![Visualization app](demo/visualization_app.png)
 ![Example prediction 1](demo/predict.gif)
 ![Example prediction 2](demo/predict_2.gif)
