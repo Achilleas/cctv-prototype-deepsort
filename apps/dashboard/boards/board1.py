@@ -82,15 +82,15 @@ class MainDashboard(BoardBlock):
                 if 'ALERT ID' in r.keys():
                     alert_ids.append(r['ALERT ID'])
 
-            #print('ALERT IDS ALREADY UP', alert_ids)
+            print('ALERT IDS ALREADY UP', alert_ids)
             video_ids_num = [video_id_str.split('_')[-1] for video_id_str in video_ids_str]
 
             #Was a human seen in camera 5 the last minute?
-            human_trigger_video_id = 5
+            human_trigger_video_id = 3
 
             if 'cctv_{}'.format(human_trigger_video_id) not in alert_ids:
                 #print('I SHOULD BE HERE MAN')
-                human_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(60), None, class_id='person', video_id=human_trigger_video_id)
+                human_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(60), None, class_id='car', video_id=human_trigger_video_id)
                 human_trigger_details_l = self.rlogger.get_event_details(human_trigger_event_l)
                 #print(human_trigger_event_l)
                 if len(human_trigger_event_l) > 0:
@@ -99,7 +99,7 @@ class MainDashboard(BoardBlock):
                     data.append({'ALERT ID' : 'cctv_{}'.format(human_trigger_video_id),
                                 'DATE' : datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                                 'TYPE' : 'detection_trigger',
-                                'INFO' : 'Object detected: person'})
+                                'INFO' : 'Object detected: CAR'})
 
 
             #For camera 6, I have expectations of vectors in which the people will approach (b-l to t-r)
@@ -107,6 +107,7 @@ class MainDashboard(BoardBlock):
             #Extract locations of trigger
             direction_video_id = 6
 
+            print('alrert ids????')
             if 'cctv_{}'.format(direction_video_id) not in alert_ids:
                 pos_trigger_event_l = self.rlogger.get_interval_events(get_millis_past(60), None, class_id='person', video_id=direction_video_id)
                 #print('POSITION TRIGGER EVENT LIST:', pos_trigger_event_l)
@@ -139,17 +140,19 @@ class MainDashboard(BoardBlock):
                         else:
                             failed_counter += 1
                         total_checked = passed_counter + failed_counter
-                        data.append({'ALERT ID' : 'cctv_{}'.format(direction_video_id),
-                                    'DATE' : datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-                                    'TYPE' : 'walk_similarity_BELOW_LIMIT',
-                                    'INFO' : 'Number objects: {}, PASSED: {} FAILED: {}, NO INFO {}:'.format(
-                                                    num_people,
-                                                    passed_counter,
-                                                    failed_counter,
-                                                    num_people - passed_counter-failed_counter)})
+
+                        if failed_counter == 1:
+                            data.append({'ALERT ID' : 'cctv_{}'.format(direction_video_id),
+                                        'DATE' : datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                                        'TYPE' : 'walk_similarity_BELOW_LIMIT',
+                                        'INFO' : 'Number objects: {}, PASSED: {} FAILED: {}, NO INFO {}:'.format(
+                                                        num_people,
+                                                        passed_counter,
+                                                        failed_counter,
+                                                        num_people - passed_counter-failed_counter)})
+                            break
             #print('DATA STATE:', data)
             return data
-
 
 config_path='deep_sort_pytorch/configs/redis_config.yml'
 with open(config_path, 'r') as ymlfile:

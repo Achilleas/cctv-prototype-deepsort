@@ -24,8 +24,8 @@ class VideoTracker(object):
         #    raise UserWarning("Running in cpu mode!")
         print('Running in cpu mode..')
         if args.display:
-            cv2.namedWindow("test", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow("test", args.display_width, args.display_height)
+            cv2.namedWindow("cctv_{}".format(args.video_id), cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("cctv_{}".format(args.video_id), args.display_width, args.display_height)
 
         self.vdo = cv2.VideoCapture()
         self.detector = build_detector(cfg, use_cuda=use_cuda)
@@ -33,7 +33,7 @@ class VideoTracker(object):
         self.class_names = self.detector.class_names
 
         self.rlogger = self.getRLogger()
-        self.video_id = 6
+        self.video_id = args.video_id
 
         self.tracking_dict = {}
 
@@ -127,7 +127,10 @@ class VideoTracker(object):
             #print(len(cls_ids))
             if bbox_xywh is not None:
                 # select person class
-                mask = cls_ids==0
+                mask_human = cls_ids==0
+                mask_car = cls_ids==2
+
+                mask = mask_human + mask_car
 
                 bbox_xywh = bbox_xywh[mask]
                 bbox_xywh[:,3:] *= 1.2 # bbox dilation just in case bbox too small
@@ -139,6 +142,7 @@ class VideoTracker(object):
 
                 #Apply tracking step and draw boxes and lines
                 if len(outputs) > 0:
+                    print('HOW MANY OUTPUTS', len(outputs))
                     bbox_xyxy = outputs[:,:4]
                     identities = outputs[:,-1]
 
@@ -151,31 +155,15 @@ class VideoTracker(object):
                     for idn in self.tracking_dict.keys():
                         rectangle_l = self.tracking_dict[idn]['rectangle_l']
                         center_l = extract_rectangle_centers(rectangle_l)
-                        if idn == 11:
-                            print('step num:', step_num)
-                            print('HELLLOOOOO')
-                            print('WHAAAA', center_l)
-                            print('DETAILS', self.tracking_dict[idn])
                         ori_im = draw_lines(ori_im, center_l, idn)
 
-                        '''
-                        #Just something for cctv 6 (similarity index)
-                        if self.video_id == 6 and (len(rectangle_l) > 5):
-                            max_y = ori_im.shape[0]
-                            max_x = ori_im.shape[1]
-                            ref_vec_l = [[0, max_y]]
-                            ref_loc_l = [[1, -1]]
-                            passed_threshold, similarity_val = general_utils.tracker_similarity_check(ref_loc_l, ref_vec_l, self.tracking_dict[idn]['rectangle_l'], ori_im.shape, threshold=0.3)
-                            x1,y1,x2,y2 = [int(i) for i in rectangle_l[-1]]
-                            t_size = cv2.getTextSize(str(similarity_val), cv2.FONT_HERSHEY_PLAIN, 2 , 2)[0]
-                            cv2.putText(ori_im,str(general_utils.truncate(similarity_val, 2)),(x1,y1+t_size[1]+20), cv2.FONT_HERSHEY_PLAIN, 2, [0,0,0], 5)
-                        '''
+
             end = time.time()
             print("time: {:.03f}s, fps: {:.03f}".format(end-start, 1/(end-start)))
 
             print('ORI IMAGE SHAPE', ori_im.shape)
             if self.args.display:
-                cv2.imshow("test", ori_im)
+                cv2.imshow("cctv_{}".format(self.video_id), ori_im)
                 cv2.waitKey(1)
 
             if self.args.save_path:
@@ -202,8 +190,9 @@ def parse_args():
     parser.add_argument("--config_deepsort", type=str, default="./configs/deep_sort.yaml")
     parser.add_argument("--ignore_display", dest="display", action="store_false", default=True)
     parser.add_argument("--frame_interval", type=int, default=1)
-    parser.add_argument("--display_width", type=int, default=800)
-    parser.add_argument("--display_height", type=int, default=600)
+    parser.add_argument("--video_id", type=int, default=0)
+    parser.add_argument("--display_width", type=int, default=600)
+    parser.add_argument("--display_height", type=int, default=400)
     parser.add_argument("--save_path", type=str, default="./demo/demo.avi")
     parser.add_argument("--cpu", dest="use_cuda", action="store_false", default=True)
     return parser.parse_args()
